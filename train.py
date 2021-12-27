@@ -1,5 +1,9 @@
 import argparse
 import jittor as jt
+
+import sys
+sys.path.append('/opt/ml/code/JDet/python/')
+
 from jdet.runner import Runner 
 from jdet.config import init_cfg
 
@@ -29,6 +33,11 @@ def main():
         default=".",
         type=str,
     )
+    
+    parser.add_argument('--model-dir', type=str, default='/opt/ml/model')  # os.environ['SM_MODEL_DIR']
+    parser.add_argument('--output-dir', type=str, default='/opt/ml/output')  # os.environ['SM_MODEL_DIR']
+    parser.add_argument('--train', type=str, default='/opt/ml/input/data/train')  # os.environ['SM_CHANNEL_TRAINING']
+    parser.add_argument('--test', type=str, default='/opt/ml/input/data/test')  # os.environ['SM_CHANNEL_TEST']
     
     args = parser.parse_args()
 

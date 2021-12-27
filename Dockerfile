@@ -53,11 +53,15 @@ RUN apt-get install -y --no-install-recommends \
          ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
+
 # forward request and error logs to docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
 RUN pip3 install flask gevent gunicorn boto3
+
+RUN pip3 install shapely
 
 ENV PATH="/opt/ml/code:${PATH}"
 
