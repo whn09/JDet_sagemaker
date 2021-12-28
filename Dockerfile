@@ -40,6 +40,19 @@ RUN pip3 install jittor --timeout 100 && python3.7 -m jittor.test.test_example
 
 RUN apt install git -y
 
+# RUN git clone https://github.com/Jittor/jittor.git /opt/ml/code/jittor
+RUN git clone https://github.com/whn09/jittor.git /opt/ml/code/jittor
+
+WORKDIR /opt/ml/code/jittor
+
+RUN pip3 uninstall jittor -y
+
+RUN pip3 install . --timeout 100
+
+RUN python3.7 -m jittor.test.test_example
+
+# CMD python3.7 -m jittor.notebook --allow-root --ip=0.0.0.0
+
 RUN git clone https://github.com/Jittor/JDet.git /opt/ml/code/JDet
 
 RUN cd /opt/ml/code/JDet && pip3 install -r requirements.txt
@@ -63,10 +76,14 @@ RUN pip3 install flask gevent gunicorn boto3
 
 RUN pip3 install shapely
 
+RUN apt install zip -y
+
 ENV PATH="/opt/ml/code:${PATH}"
 
 # /opt/ml and all subdirectories are utilized by SageMaker, we use the /code subdirectory to store our user code.
 RUN mkdir -p /opt/ml/code
+
+# no use now, since find_cache_path design
 COPY init_jittor.py /opt/ml/code
 RUN python3.7 /opt/ml/code/init_jittor.py
 
@@ -76,6 +93,7 @@ COPY serve /opt/ml/code
 COPY wsgi.py /opt/ml/code
 COPY predictor.py /opt/ml/code
 COPY nginx.conf /opt/ml/code
+COPY runner.py /opt/ml/code
 
 COPY tmp.png /opt/ml/code
 

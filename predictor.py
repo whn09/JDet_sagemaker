@@ -7,6 +7,16 @@ import flask
 import boto3
 import io
 
+import yaml
+config_file = '/opt/ml/model/config.yaml'
+with open(config_file, "r") as f:
+    cfg = yaml.load(f.read(), Loader=yaml.Loader)
+print('cfg:', cfg)
+# if 'dataset' in cfg:
+#     del cfg['dataset']
+with open(config_file,"w") as f:
+    f.write(yaml.safe_dump(cfg, default_flow_style=False))
+
 import time
 import jittor as jt
 import numpy as np
@@ -14,7 +24,8 @@ import numpy as np
 import sys
 sys.path.append('/opt/ml/code/JDet/python/')
 
-from jdet.runner import Runner 
+# from jdet.runner import Runner 
+from runner import Runner
 from jdet.config import init_cfg
 
 from PIL import Image
@@ -55,7 +66,6 @@ app = flask.Flask(__name__)
 
 s3_client = boto3.client('s3')
 
-config_file = '/opt/ml/model/config.yaml'
 init_cfg(config_file)
 runner = Runner()
 model = runner.model
@@ -63,6 +73,11 @@ model.eval()
 
 print('init done.')
 
+image, target = get_data('tmp.png')
+inference_result = model(jt.array(image[np.newaxis, :, :, :].tolist()), [target])  # TODO bug
+print('inference_result:', inference_result)
+_payload = json.dumps(inference_result,ensure_ascii=False)
+print('_payload:', _payload)
 
 @app.route('/ping', methods=['GET'])
 def ping():
