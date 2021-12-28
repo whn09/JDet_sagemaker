@@ -67,11 +67,16 @@ ENV PATH="/opt/ml/code:${PATH}"
 
 # /opt/ml and all subdirectories are utilized by SageMaker, we use the /code subdirectory to store our user code.
 RUN mkdir -p /opt/ml/code
+COPY init_jittor.py /opt/ml/code
+RUN python3.7 /opt/ml/code/init_jittor.py
+
 COPY train /opt/ml/code
 COPY train.py /opt/ml/code
 COPY serve /opt/ml/code
 COPY wsgi.py /opt/ml/code
 COPY predictor.py /opt/ml/code
 COPY nginx.conf /opt/ml/code
+
+COPY tmp.png /opt/ml/code
 
 WORKDIR /opt/ml/code
