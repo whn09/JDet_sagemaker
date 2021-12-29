@@ -31,6 +31,9 @@ from jdet.config import init_cfg
 from PIL import Image
 from jdet.data.transforms import Compose
 
+# turn on cuda
+jt.flags.use_cuda = 1
+
 transforms=[
             dict(
                 type="RotatedResize",
@@ -49,16 +52,16 @@ transforms=[
 transforms = Compose(transforms)
 
 def get_data(filename):
-    img = Image.open(filename).convert("RGB")
-    targets = dict(
-        ori_img_size=img.size,
-        img_size=img.size,
+    image = Image.open(filename).convert("RGB")
+    target = dict(
+        ori_img_size=image.size,
+        img_size=image.size,
         scale_factor=1.,
         img_file = filename
     )
 
-    img,targets = transforms(img,targets)
-    return img,targets 
+    image,target = transforms(image,target)
+    return image,target
 
 
 # The flask app for serving predictions
@@ -74,10 +77,15 @@ model.eval()
 print('init done.')
 
 image, target = get_data('tmp.png')
-inference_result = model(jt.array(image[np.newaxis, :, :, :].tolist()), [target])  # TODO bug
-print('inference_result:', inference_result)
-_payload = json.dumps(inference_result,ensure_ascii=False)
-print('_payload:', _payload)
+inference_result = model(jt.array([image]), [target])
+# print('inference_result:', inference_result)
+# print(inference_result[0][0].shape, inference_result[0][1].shape, inference_result[0][2].shape)
+boxes, scores, classes = inference_result[0]
+result = {'boxes': boxes.numpy().tolist(), 'scores': scores.numpy().tolist(), 'classes': classes.numpy().tolist()}
+_payload = json.dumps(result,ensure_ascii=False)
+# print('_payload:', _payload)
+
+print('test done')
 
 @app.route('/ping', methods=['GET'])
 def ping():
@@ -127,8 +135,9 @@ def invocations():
         print('Download finished!')
 
     image, target = get_data(download_file_name)
-    inference_result = model(image, target)
-    
-    _payload = json.dumps(inference_result,ensure_ascii=False)
+    inference_result = model(jt.array([image]), [target])
+    boxes, scores, classes = inference_result[0]
+    result = {'boxes': boxes.numpy().tolist(), 'scores': scores.numpy().tolist(), 'classes': classes.numpy().tolist()}
+    _payload = json.dumps(result,ensure_ascii=False)
 
     return flask.Response(response=_payload, status=200, mimetype='application/json')
