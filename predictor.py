@@ -1,21 +1,10 @@
 # -*- coding: utf-8 -*-
-import sys
 import json
 import os
 import warnings
 import flask
 import boto3
 import io
-
-import yaml
-config_file = '/opt/ml/model/config.yaml'
-with open(config_file, "r") as f:
-    cfg = yaml.load(f.read(), Loader=yaml.Loader)
-print('cfg:', cfg)
-# if 'dataset' in cfg:
-#     del cfg['dataset']
-with open(config_file,"w") as f:
-    f.write(yaml.safe_dump(cfg, default_flow_style=False))
 
 import time
 import jittor as jt
@@ -33,6 +22,16 @@ from jdet.data.transforms import Compose
 
 # turn on cuda
 jt.flags.use_cuda = 1
+
+import yaml
+config_file = '/opt/ml/model/config.yaml'
+with open(config_file, "r") as f:
+    cfg = yaml.load(f.read(), Loader=yaml.Loader)
+print('cfg:', cfg)
+# if 'dataset' in cfg:
+#     del cfg['dataset']
+with open(config_file,"w") as f:
+    f.write(yaml.safe_dump(cfg, default_flow_style=False))
 
 transforms=[
             dict(
