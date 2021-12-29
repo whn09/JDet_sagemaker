@@ -78,6 +78,8 @@ RUN pip3 install shapely
 
 RUN apt install zip -y
 
+RUN pip3 install nvgpu
+
 ENV PATH="/opt/ml/code:${PATH}"
 
 # /opt/ml and all subdirectories are utilized by SageMaker, we use the /code subdirectory to store our user code.
